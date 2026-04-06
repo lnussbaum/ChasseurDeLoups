@@ -479,7 +479,11 @@
             revealedCount++;
             const el = document.getElementById(`cell-${r}-${c}`);
             el.classList.add('revealed');
-            if (cell.isWolf) { gameOver(false); return; }
+            if (cell.isWolf) { 
+                if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+                gameOver(false); 
+                return; 
+            }
             if (cell.count > 0) {
                 el.textContent = cell.count;
                 el.classList.add(`val-${cell.count}`);
@@ -513,7 +517,6 @@
             setTimeout(() => {
                 if (win) document.getElementById('win-modal').classList.add('active');
                 else {
-                    if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
                     document.getElementById('lose-modal').classList.add('active');
                 }
             }, 800);
