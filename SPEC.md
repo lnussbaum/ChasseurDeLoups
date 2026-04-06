@@ -13,13 +13,13 @@
 - **La Grille** : Un champ de cases carrées. Certaines cachent des loups.
 - **Les Indices** : Cliquer sur une case révèle soit un loup (défaite), soit un chiffre indiquant combien de loups se trouvent dans les 8 cases adjacentes.
 - **Les Niveaux** :
-    - **Apprenti** : 6x6 cases, 6 loups (Le plus petit).
+    - **Apprenti** : 6x6 cases, 5 loups (Le plus petit).
     - **Explorateur** : 8x8 cases, 8 loups.
     - **Chasseur** : 9x9 cases, 10 loups (Standard Débutant).
     - **Grand Chasseur** : 12x12 cases, 20 loups.
 - **Modes d'action** : Un bouton sélecteur en bas de l'écran permet de basculer entre :
     - **Mode Découverte** (Icône Empreinte de pas humain) : Suit la piste de l'enfant qui marche et révèle le contenu de la case.
-    - **Mode Filet** (Icône Filet/Capture) : Lance un filet pour marquer l'emplacement supposé d'un loup.
+    - **Mode Drapeau** (Icône Drapeau) : Pose un drapeau pour marquer l'emplacement supposé d'un loup.
 
 ## 4. Interface Utilisateur (UI)
 - **Thème Visuel** : Forêt mystérieuse mais colorée, adaptée aux enfants.

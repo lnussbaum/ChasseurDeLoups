@@ -118,11 +118,12 @@
             padding: 6px;
             border-radius: 12px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            width: 100%;
+            max-width: 500px;
         }
 
         .cell {
-            width: 45px;
-            height: 45px;
+            aspect-ratio: 1 / 1;
             background-color: var(--leaf-green);
             border-radius: 8px;
             display: flex;
@@ -147,21 +148,15 @@
             font-size: 1.8rem;
         }
 
-        .cell.netted::after {
+        .cell.flagged::after {
             content: '';
             position: absolute;
-            width: 90%;
-            height: 90%;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18l7.8 3.9-3.9 1.95L8.1 6.13l3.9-1.95zM4.2 8.12l7.8 3.9v7.8l-7.8-3.9v-7.8zm9.8 11.7v-7.8l7.8-3.9v7.8l-7.8 3.9z' fill='%23ffd700'/%3E%3C/svg%3E");
+            width: 80%;
+            height: 80%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffd700' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z'/%3E%3Cline x1='4' y1='22' x2='4' y2='15'/%3E%3C/svg%3E");
             background-size: contain;
             background-repeat: no-repeat;
             filter: drop-shadow(0 0 5px var(--gold));
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
         }
 
         /* Couleurs des chiffres */
@@ -267,7 +262,7 @@
     <div id="home-screen" class="screen active">
         <h1>🐺 Chasseur<br>de Loups</h1>
         <div class="difficulty-buttons">
-            <button onclick="startGame(6, 6)">Apprenti (6x6)</button>
+            <button onclick="startGame(6, 5)">Apprenti (6x6)</button>
             <button onclick="startGame(8, 8)">Explorateur (8x8)</button>
             <button onclick="startGame(9, 10)">Chasseur (9x9)</button>
             <button onclick="startGame(12, 20)">Grand Chasseur (12x12)</button>
@@ -278,8 +273,11 @@
     <div id="game-screen" class="screen">
         <div id="game-header">
             <div class="stat-box">
-                <!-- Icône Filet Stat -->
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--gold)"><path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/></svg>
+                <!-- Icône Drapeau Stat -->
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                    <line x1="4" y1="22" x2="4" y2="15" />
+                </svg>
                 <span id="wolf-count">0</span>
             </div>
             <div class="stat-box">
@@ -297,19 +295,16 @@
             <div class="mode-toggle">
                 <div id="selector-bg" class="selector-bg"></div>
                 <div class="mode-btn active" id="btn-discover" onclick="setMode('discover')">
-                    <!-- Icône Patte de Loup -->
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="16.5" r="4.5" />
-                        <circle cx="6.5" cy="11" r="2.5" />
-                        <circle cx="10" cy="7.5" r="2.5" />
-                        <circle cx="14" cy="7.5" r="2.5" />
-                        <circle cx="17.5" cy="11" r="2.5" />
+                    <!-- Icône Empreinte humaine (un seul pied gauche) -->
+                    <svg viewBox="0 0 35 70">
+                        <path d="M24.9,13.8c4.1,3.6,0.3,12.2-5.5,15c-4.9,2.3-12.2,7.4-13.5,13.7c0.8-4-4.2-18.2,0.8-24.3C11.6,12.2,20.6,10.1,24.9,13.8z M14,35.9c-2.8,5.2,3.5,8.8,4.5,15c0.8,5.1-4,11.1-9.7,8c-3.3-1.8-4.4-5.8-3.4-10.7C6.4,43.2,11.2,37.6,14,35.9z M22,3.4c0.6-2.6,3.6-3.9,5.3-3.2c1.7,0.6,2.9,2.6,2.6,5.1c-0.4,2.5-4.3,4.2-5.1,6.5C22.2,9.1,21.4,6,22,3.4z M14.4,4.4c-0.1-1.9,1.6-3.3,2.9-3.3c1.3,0.1,2.5,1.2,2.8,2.9s-2,3.7-2,5.4C15.7,8.2,14.6,6.3,14.4,4.4z M8.6,6.5c-0.1-1.7,1.4-3,2.6-2.9c1.1,0.1,2.2,1,2.5,2.6c0.2,1.6-1.8,3.3-1.8,4.8C9.8,9.9,8.7,8.2,8.6,6.5z M7.9,13.8c-2-0.3-3.3-1.4-3.8-2.7c-0.6-1.3,0.3-2.8,1.2-3c0.9-0.3,2.1,0.2,2.7,1.4C8.6,10.6,7.4,12.6,7.9,13.8z M2.1,12.9c0.8-0.3,1.8-0.1,2.6,0.8c0.7,0.9,0,2.8,0.5,3.8c-1.8,0-3.1-0.8-3.7-1.8C0.8,14.7,1.4,13.3,2.1,12.9z"/>
                     </svg>
                 </div>
-                <div class="mode-btn" id="btn-net" onclick="setMode('net')">
-                    <!-- Icône Filet Trappeur -->
-                    <svg viewBox="0 0 24 24">
-                        <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM12 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zM6 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm6 0c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm6 0c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0-6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm-6 0c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                <div class="mode-btn" id="btn-flag" onclick="setMode('flag')">
+                    <!-- Icône Drapeau -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                        <line x1="4" y1="22" x2="4" y2="15" />
                     </svg>
                 </div>
             </div>
@@ -333,7 +328,10 @@
         </svg>
         <h2 style="color: var(--danger-red); font-size: 2.2rem;">GRRR ! PERDU !</h2>
         <p style="color: white; font-size: 1.2rem;">Le loup t'a attrapé...</p>
-        <button style="background: var(--danger-red);" onclick="showHome()">REJOUER</button>
+        <div style="display: flex; gap: 10px;">
+            <button style="background: var(--danger-red);" onclick="restartGame()">REJOUER</button>
+            <button style="background: var(--dirt-brown);" onclick="showHome()">MENU</button>
+        </div>
     </div>
 
     <!-- Modale Victoire -->
@@ -341,16 +339,20 @@
         <div style="font-size: 6rem;">👑</div>
         <h2 style="color: var(--gold); font-size: 2.5rem;">BRAVO !</h2>
         <p style="color: white; font-size: 1.3rem;">Tu es le roi de la forêt !</p>
-        <button onclick="showHome()">REJOUER</button>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="restartGame()">REJOUER</button>
+            <button style="background: var(--dirt-brown);" onclick="showHome()">MENU</button>
+        </div>
     </div>
 
     <script>
-        let config = { size: 6, wolves: 6 };
+        let config = { size: 6, wolves: 5 };
+        let lastConfig = { size: 6, wolves: 5 };
         let gridData = [];
         let gameMode = 'discover';
         let gameActive = false;
         let revealedCount = 0;
-        let netsCount = 0;
+        let flagsCount = 0;
         let timerInterval;
         let seconds = 0;
 
@@ -363,9 +365,10 @@
         function startGame(size, wolves) {
             config.size = size;
             config.wolves = wolves;
+            lastConfig = { size, wolves };
             gameActive = true;
             revealedCount = 0;
-            netsCount = 0;
+            flagsCount = 0;
             seconds = 0;
             updateUI();
             document.getElementById('home-screen').classList.remove('active');
@@ -374,8 +377,13 @@
             startTimer();
         }
 
+        function restartGame() {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+            startGame(lastConfig.size, lastConfig.wolves);
+        }
+
         function updateUI() {
-            document.getElementById('wolf-count').textContent = config.wolves - netsCount;
+            document.getElementById('wolf-count').textContent = config.wolves - flagsCount;
             document.getElementById('timer').textContent = "00:00";
             setMode('discover');
         }
@@ -383,16 +391,16 @@
         function setMode(mode) {
             gameMode = mode;
             const bg = document.getElementById('selector-bg');
-            const btnNet = document.getElementById('btn-net');
+            const btnFlag = document.getElementById('btn-flag');
             const btnDisc = document.getElementById('btn-discover');
-            if (mode === 'net') {
+            if (mode === 'flag') {
                 bg.style.transform = 'translateX(78px)';
-                btnNet.classList.add('active');
+                btnFlag.classList.add('active');
                 btnDisc.classList.remove('active');
             } else {
                 bg.style.transform = 'translateX(0px)';
                 btnDisc.classList.add('active');
-                btnNet.classList.remove('active');
+                btnFlag.classList.remove('active');
             }
         }
 
@@ -404,7 +412,7 @@
             for (let r = 0; r < config.size; r++) {
                 gridData[r] = [];
                 for (let c = 0; c < config.size; c++) {
-                    gridData[r][c] = { isWolf: false, revealed: false, netted: false, count: 0, r, c };
+                    gridData[r][c] = { isWolf: false, revealed: false, flagged: false, count: 0, r, c };
                     const cell = document.createElement('div');
                     cell.className = 'cell';
                     cell.id = `cell-${r}-${c}`;
@@ -445,21 +453,21 @@
             if (!gameActive) return;
             const cell = gridData[r][c];
             if (cell.revealed) return;
-            if (gameMode === 'net') {
-                cell.netted = !cell.netted;
-                document.getElementById(`cell-${r}-${c}`).classList.toggle('netted');
-                netsCount += cell.netted ? 1 : -1;
-                document.getElementById('wolf-count').textContent = config.wolves - netsCount;
+            if (gameMode === 'flag') {
+                cell.flagged = !cell.flagged;
+                document.getElementById(`cell-${r}-${c}`).classList.toggle('flagged');
+                flagsCount += cell.flagged ? 1 : -1;
+                document.getElementById('wolf-count').textContent = config.wolves - flagsCount;
                 if ('vibrate' in navigator) navigator.vibrate(30);
             } else {
-                if (cell.netted) return;
+                if (cell.flagged) return;
                 revealCell(r, c);
             }
         }
 
         function revealCell(r, c) {
             const cell = gridData[r][c];
-            if (cell.revealed || cell.netted) return;
+            if (cell.revealed || cell.flagged) return;
             cell.revealed = true;
             revealedCount++;
             const el = document.getElementById(`cell-${r}-${c}`);
