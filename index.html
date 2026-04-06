@@ -114,11 +114,10 @@
 
         #game-container {
             width: 100%;
-            flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 5px;
+            padding: 15px 5px;
         }
 
         #grid {
@@ -178,12 +177,10 @@
 
         /* --- Contrôles (Bas) --- */
         #controls {
-            padding: 15px;
+            padding: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: var(--forest-green);
-            border-top: 4px solid var(--dirt-brown);
         }
 
         .mode-toggle {
@@ -282,7 +279,7 @@
     </div>
 
     <!-- Écran de jeu -->
-    <div id="game-screen" class="screen">
+    <div id="game-screen" class="screen" style="justify-content: flex-start; padding: 0;">
         <div id="game-header">
             <div class="stat-box">
                 <!-- Icône Drapeau Stat -->
@@ -296,28 +293,35 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--gold)"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/></svg>
                 <span id="timer">00:00</span>
             </div>
-            <button style="padding: 8px 15px; border-radius: 12px;" onclick="showHome()">Quitter</button>
+            <div style="display: flex; gap: 8px;">
+                <button style="padding: 8px 12px; border-radius: 12px; font-size: 1.4rem; display: flex; align-items: center; justify-content: center;" onclick="toggleFullScreen()" title="Plein écran">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                    </svg>
+                </button>
+                <button style="padding: 8px 12px; border-radius: 12px; font-size: 1.4rem; display: flex; align-items: center; justify-content: center;" onclick="showHome()" title="Accueil">🏠</button>
+            </div>
         </div>
 
-        <div id="game-container">
+        <div id="game-container" style="flex-grow: 1; flex-direction: column; padding: 10px 5px;">
             <div id="grid"></div>
-        </div>
-
-        <div id="controls">
-            <div class="mode-toggle">
-                <div id="selector-bg" class="selector-bg"></div>
-                <div class="mode-btn active" id="btn-discover" onclick="setMode('discover')">
-                    <!-- Icône Empreinte humaine (un seul pied gauche) -->
-                    <svg viewBox="0 0 35 70">
-                        <path d="M24.9,13.8c4.1,3.6,0.3,12.2-5.5,15c-4.9,2.3-12.2,7.4-13.5,13.7c0.8-4-4.2-18.2,0.8-24.3C11.6,12.2,20.6,10.1,24.9,13.8z M14,35.9c-2.8,5.2,3.5,8.8,4.5,15c0.8,5.1-4,11.1-9.7,8c-3.3-1.8-4.4-5.8-3.4-10.7C6.4,43.2,11.2,37.6,14,35.9z M22,3.4c0.6-2.6,3.6-3.9,5.3-3.2c1.7,0.6,2.9,2.6,2.6,5.1c-0.4,2.5-4.3,4.2-5.1,6.5C22.2,9.1,21.4,6,22,3.4z M14.4,4.4c-0.1-1.9,1.6-3.3,2.9-3.3c1.3,0.1,2.5,1.2,2.8,2.9s-2,3.7-2,5.4C15.7,8.2,14.6,6.3,14.4,4.4z M8.6,6.5c-0.1-1.7,1.4-3,2.6-2.9c1.1,0.1,2.2,1,2.5,2.6c0.2,1.6-1.8,3.3-1.8,4.8C9.8,9.9,8.7,8.2,8.6,6.5z M7.9,13.8c-2-0.3-3.3-1.4-3.8-2.7c-0.6-1.3,0.3-2.8,1.2-3c0.9-0.3,2.1,0.2,2.7,1.4C8.6,10.6,7.4,12.6,7.9,13.8z M2.1,12.9c0.8-0.3,1.8-0.1,2.6,0.8c0.7,0.9,0,2.8,0.5,3.8c-1.8,0-3.1-0.8-3.7-1.8C0.8,14.7,1.4,13.3,2.1,12.9z"/>
-                    </svg>
-                </div>
-                <div class="mode-btn" id="btn-flag" onclick="setMode('flag')">
-                    <!-- Icône Drapeau -->
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-                        <line x1="4" y1="22" x2="4" y2="15" />
-                    </svg>
+            
+            <div id="controls">
+                <div class="mode-toggle">
+                    <div id="selector-bg" class="selector-bg"></div>
+                    <div class="mode-btn active" id="btn-discover" onclick="setMode('discover')">
+                        <!-- Icône Empreinte humaine (un seul pied gauche) -->
+                        <svg viewBox="0 0 35 70">
+                            <path d="M24.9,13.8c4.1,3.6,0.3,12.2-5.5,15c-4.9,2.3-12.2,7.4-13.5,13.7c0.8-4-4.2-18.2,0.8-24.3C11.6,12.2,20.6,10.1,24.9,13.8z M14,35.9c-2.8,5.2,3.5,8.8,4.5,15c0.8,5.1-4,11.1-9.7,8c-3.3-1.8-4.4-5.8-3.4-10.7C6.4,43.2,11.2,37.6,14,35.9z M22,3.4c0.6-2.6,3.6-3.9,5.3-3.2c1.7,0.6,2.9,2.6,2.6,5.1c-0.4,2.5-4.3,4.2-5.1,6.5C22.2,9.1,21.4,6,22,3.4z M14.4,4.4c-0.1-1.9,1.6-3.3,2.9-3.3c1.3,0.1,2.5,1.2,2.8,2.9s-2,3.7-2,5.4C15.7,8.2,14.6,6.3,14.4,4.4z M8.6,6.5c-0.1-1.7,1.4-3,2.6-2.9c1.1,0.1,2.2,1,2.5,2.6c0.2,1.6-1.8,3.3-1.8,4.8C9.8,9.9,8.7,8.2,8.6,6.5z M7.9,13.8c-2-0.3-3.3-1.4-3.8-2.7c-0.6-1.3,0.3-2.8,1.2-3c0.9-0.3,2.1,0.2,2.7,1.4C8.6,10.6,7.4,12.6,7.9,13.8z M2.1,12.9c0.8-0.3,1.8-0.1,2.6,0.8c0.7,0.9,0,2.8,0.5,3.8c-1.8,0-3.1-0.8-3.7-1.8C0.8,14.7,1.4,13.3,2.1,12.9z"/>
+                        </svg>
+                    </div>
+                    <div class="mode-btn" id="btn-flag" onclick="setMode('flag')">
+                        <!-- Icône Drapeau -->
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                            <line x1="4" y1="22" x2="4" y2="15" />
+                        </svg>
+                    </div>
                 </div>
             </div>
         </div>
@@ -532,6 +536,18 @@
                 let s = (seconds % 60).toString().padStart(2, '0');
                 document.getElementById('timer').textContent = `${m}:${s}`;
             }, 1000);
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
         }
     </script>
 </body>
