@@ -18,8 +18,8 @@
     - **Chasseur** : 9x9 cases, 10 loups (Standard Débutant).
     - **Grand Chasseur** : 12x12 cases, 20 loups.
 - **Modes d'action** : Un bouton sélecteur en bas de l'écran permet de basculer entre :
-    - **Mode Découverte** (Icône Empreinte de pas humain) : Suit la piste de l'enfant qui marche et révèle le contenu de la case.
-    - **Mode Drapeau** (Icône Drapeau) : Pose un drapeau pour marquer l'emplacement supposé d'un loup.
+    - **Mode Découverte** (Icône Traces de pas) : Suit la piste de l'enfant qui marche et révèle le contenu de la case.
+    - **Mode Couteau** (Icône Couteau) : Plante un couteau pour marquer l'emplacement supposé d'un loup.
 
 ## 4. Interface Utilisateur (UI)
 - **Thème Visuel** : Forêt mystérieuse mais colorée, adaptée aux enfants.
