@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Chasseur de Loups</title>
+<style>
+:root {
+  --forest-dark: #1a3a1a;
+  --forest-mid: #2d5a27;
+  --forest-light: #4a8c3f;
+  --forest-pale: #b5d6a7;
+  --earth-brown: #8B6914;
+  --earth-light: #d4b36a;
+  --sky-blue: #87CEEB;
+  --danger-red: #c0392b;
+  --danger-dark: #7b241c;
+  --gold: #f1c40f;
+  --cell-hidden: #5d8a4a;
+  --cell-hidden-alt: #4f7d3c;
+  --cell-revealed: #d4c89a;
+  --cell-revealed-alt: #c9bb82;
+  --cell-size: min(calc((100vw - 20px) / var(--cols)), calc((100vh - 140px) / var(--rows)));
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(180deg, #1a3a1a 0%, #2d5a27 40%, #4a8c3f 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  text-align: center;
+}
+#menu h1 {
+  font-size: 2.5em;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+  margin-bottom: 10px;
+  color: var(--gold);
+}
+#menu .subtitle {
+  font-size: 1.1em;
+  color: var(--forest-pale);
+  margin-bottom: 30px;
+}
+.level-btn {
+  display: block;
+  width: 260px;
+  margin: 8px auto;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.2em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  text-align: center;
+}
+.level-btn:active { transform: scale(0.96); }
+.level-btn.apprenti { background: linear-gradient(135deg, #27ae60, #2ecc71); color: #fff; }
+.level-btn.explorateur { background: linear-gradient(135deg, #2980b9, #3498db); color: #fff; }
+.level-btn.chasseur { background: linear-gradient(135deg, #8e44ad, #9b59b6); color: #fff; }
+.level-btn.grand-chasseur { background: linear-gradient(135deg, #c0392b, #e74c3c); color: #fff; }
+
+#game {
+  display: none;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+#header .left, #header .right { display: flex; align-items: center; gap: 10px; }
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+.stat .icon { font-size: 1.2em; }
+#timer-display { min-width: 45px; text-align: center; }
+.hdr-btn {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1.3em;
+  width: 38px;
+  height: 38px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.hdr-btn:active { background: rgba(255,255,255,0.3); }
+
+#grid-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  overflow: hidden;
+}
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--cell-size));
+  grid-template-rows: repeat(var(--rows), var(--cell-size));
+  gap: 3px;
+}
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: calc(var(--cell-size) * 0.48);
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+  position: relative;
+}
+.cell.hidden {
+  background: var(--cell-hidden);
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.15);
+}
+.cell.hidden.alt {
+  background: var(--cell-hidden-alt);
+}
+.cell.hidden:active { transform: scale(0.92); }
+.cell.revealed {
+  background: var(--cell-revealed);
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.1);
+  cursor: default;
+}
+.cell.revealed.alt {
+  background: var(--cell-revealed-alt);
+}
+.cell.knife {
+  background: var(--cell-hidden);
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.15);
+}
+.cell.knife.alt {
+  background: var(--cell-hidden-alt);
+}
+.cell.wolf-revealed {
+  background: var(--danger-red);
+  animation: wolfBump 0.3s ease;
+}
+.cell .n1 { color: #2980b9; }
+.cell .n2 { color: #27ae60; }
+.cell .n3 { color: #e74c3c; }
+.cell .n4 { color: #8e44ad; }
+.cell .n5 { color: #c0392b; }
+.cell .n6 { color: #16a085; }
+.cell .n7 { color: #2c3e50; }
+.cell .n8 { color: #7f8c8d; }
+
+@keyframes wolfBump {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+@keyframes shake {
+  0%,100% { transform: translate(0); }
+  10% { transform: translate(-6px, 4px); }
+  20% { transform: translate(6px, -4px); }
+  30% { transform: translate(-4px, 6px); }
+  40% { transform: translate(4px, -6px); }
+  50% { transform: translate(-6px, -4px); }
+  60% { transform: translate(6px, 4px); }
+  70% { transform: translate(-4px, -6px); }
+  80% { transform: translate(4px, 6px); }
+  90% { transform: translate(-6px, 4px); }
+}
+
+#footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  gap: 14px;
+}
+.mode-label {
+  font-size: 0.95em;
+  font-weight: bold;
+  text-align: center;
+  min-width: 70px;
+}
+.mode-label.active { color: var(--gold); }
+.toggle-container {
+  position: relative;
+  width: 70px;
+  height: 38px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 19px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.toggle-container.knife-mode {
+  background: rgba(192,57,43,0.5);
+}
+.toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.3s, background 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.toggle-container.knife-mode .toggle-knob {
+  transform: translateX(32px);
+  background: var(--danger-red);
+  color: #fff;
+}
+
+#overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(3px);
+}
+#overlay.show { display: flex; }
+
+.modal {
+  background: linear-gradient(180deg, #2d5a27 0%, #1a3a1a 100%);
+  border-radius: 20px;
+  padding: 30px 24px;
+  text-align: center;
+  max-width: 340px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  animation: modalPop 0.35s ease;
+}
+@keyframes modalPop {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.modal h2 {
+  font-size: 1.6em;
+  margin-bottom: 10px;
+}
+.modal p { font-size: 1em; margin-bottom: 20px; color: var(--forest-pale); }
+.modal-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px;
+  transition: transform 0.15s;
+}
+.modal-btn:active { transform: scale(0.95); }
+.modal-btn.primary { background: var(--gold); color: #333; }
+.modal-btn.secondary { background: rgba(255,255,255,0.2); color: #fff; }
+
+#defeat-wolf {
+  animation: shake 0.5s ease-in-out infinite;
+  margin-bottom: 10px;
+}
+
+.victory-crown {
+  font-size: 4em;
+  animation: crownBounce 0.6s ease infinite alternate;
+}
+@keyframes crownBounce {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-10px) scale(1.1); }
+}
+</style>
+</head>
+<body>
+
+<div id="menu">
+  <h1>🐺 Chasseur de Loups</h1>
+  <p class="subtitle">Découvre la forêt… sans réveiller les loups !</p>
+  <button class="level-btn apprenti" onclick="startGame(6,6,5)"> apprenti<br><small>6×6 · 5 loups</small></button>
+  <button class="level-btn explorateur" onclick="startGame(8,8,8)"> explorateur<br><small>8×8 · 8 loups</small></button>
+  <button class="level-btn chasseur" onclick="startGame(9,9,10)"> chasseur<br><small>9×9 · 10 loups</small></button>
+  <button class="level-btn grand-chasseur" onclick="startGame(12,12,20)"> grand chasseur<br><small>12×12 · 20 loups</small></button>
+</div>
+
+<div id="game">
+  <div id="header">
+    <div class="left">
+      <div class="stat"><span class="icon">🔪</span><span id="wolf-count">0</span></div>
+      <div class="stat"><span class="icon">⏱️</span><span id="timer-display">0</span></div>
+    </div>
+    <div class="right">
+      <button class="hdr-btn" id="btn-home" title="Accueil">🏠</button>
+      <button class="hdr-btn" id="btn-fs" title="Plein écran">⛶</button>
+    </div>
+  </div>
+  <div id="grid-container">
+    <div id="grid"></div>
+  </div>
+  <div id="footer">
+    <div class="mode-label active" id="label-discover">👣 Découverte</div>
+    <div class="toggle-container" id="mode-toggle" onclick="toggleMode()">
+      <div class="toggle-knob">👣</div>
+    </div>
+    <div class="mode-label" id="label-knife">🔪 Couteau</div>
+  </div>
+</div>
+
+<div id="overlay">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+let rows, cols, totalWolves, grid, revealed, knives, gameState, timer, seconds, currentMode;
+
+const NEIGHBORS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+function startGame(r, c, w) {
+  rows = r; cols = c; totalWolves = w;
+  currentMode = 'discover';
+  gameState = 'playing';
+  seconds = 0;
+  if (timer) clearInterval(timer);
+  timer = null;
+
+  grid = Array.from({length: rows}, () => Array(cols).fill(0));
+  revealed = Array.from({length: rows}, () => Array(cols).fill(false));
+  knives = Array.from({length: rows}, () => Array(cols).fill(false));
+
+  let placed = 0;
+  while (placed < totalWolves) {
+    const rr = Math.floor(Math.random() * rows);
+    const cc = Math.floor(Math.random() * cols);
+    if (grid[rr][cc] !== -1) { grid[rr][cc] = -1; placed++; }
+  }
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (grid[i][j] === -1) continue;
+      let cnt = 0;
+      for (const [di,dj] of NEIGHBORS) {
+        const ni = i+di, nj = j+dj;
+        if (ni>=0 && ni<rows && nj>=0 && nj<cols && grid[ni][nj]===-1) cnt++;
+      }
+      grid[i][j] = cnt;
+    }
+  }
+
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('game').style.display = 'flex';
+  document.getElementById('overlay').className = '';
+  document.getElementById('overlay').style.display = 'none';
+
+  updateModeUI();
+  renderGrid();
+  updateWolfCount();
+  updateTimer();
+}
+
+function renderGrid() {
+  const g = document.getElementById('grid');
+  g.style.setProperty('--cols', cols);
+  g.style.setProperty('--rows', rows);
+  g.innerHTML = '';
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell hidden' + ((i+j)%2 ? ' alt' : '');
+      cell.dataset.row = i;
+      cell.dataset.col = j;
+      cell.addEventListener('click', () => onCellClick(i, j));
+      g.appendChild(cell);
+    }
+  }
+  adjustCellSize();
+}
+
+function adjustCellSize() {
+  const maxW = window.innerWidth - 26;
+  const maxH = window.innerHeight - 140;
+  const cellW = Math.floor((maxW - (cols-1)*3) / cols);
+  const cellH = Math.floor((maxH - (rows-1)*3) / rows);
+  const cellSize = Math.min(cellW, cellH, 60);
+  document.getElementById('grid').style.setProperty('--cell-size', cellSize + 'px');
+}
+
+function getCell(i, j) {
+  return document.getElementById('grid').children[i * cols + j];
+}
+
+function onCellClick(i, j) {
+  if (gameState !== 'playing') return;
+
+  if (currentMode === 'knife') {
+    placeKnife(i, j);
+    return;
+  }
+
+  if (knives[i][j] || revealed[i][j]) return;
+
+  if (!timer) {
+    timer = setInterval(() => { seconds++; updateTimer(); }, 1000);
+  }
+
+  if (grid[i][j] === -1) {
+    gameLose(i, j);
+    return;
+  }
+
+  reveal(i, j);
+  checkWin();
+}
+
+function reveal(i, j) {
+  if (i<0||i>=rows||j<0||j>=cols) return;
+  if (revealed[i][j] || knives[i][j]) return;
+  if (grid[i][j] === -1) return;
+
+  revealed[i][j] = true;
+  const cell = getCell(i, j);
+  cell.className = 'cell revealed' + ((i+j)%2 ? ' alt' : '');
+
+  if (grid[i][j] > 0) {
+    const span = document.createElement('span');
+    span.className = 'n' + grid[i][j];
+    span.textContent = grid[i][j];
+    cell.textContent = '';
+    cell.appendChild(span);
+  } else {
+    cell.textContent = '';
+    for (const [di,dj] of NEIGHBORS) {
+      reveal(i+di, j+dj);
+    }
+  }
+}
+
+function placeKnife(i, j) {
+  if (revealed[i][j]) return;
+
+  if (knives[i][j]) {
+    knives[i][j] = false;
+    const cell = getCell(i, j);
+    cell.className = 'cell hidden' + ((i+j)%2 ? ' alt' : '');
+    cell.textContent = '';
+  } else {
+    knives[i][j] = true;
+    const cell = getCell(i, j);
+    cell.className = 'cell knife' + ((i+j)%2 ? ' alt' : '');
+    cell.textContent = '🔪';
+    if (navigator.vibrate) navigator.vibrate(50);
+  }
+  updateWolfCount();
+  checkWin();
+}
+
+function updateWolfCount() {
+  const knifeCount = knives.flat().filter(Boolean).length;
+  document.getElementById('wolf-count').textContent = totalWolves - knifeCount;
+}
+
+function updateTimer() {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  document.getElementById('timer-display').textContent = m > 0 ? m + ':' + String(s).padStart(2,'0') : s;
+}
+
+function checkWin() {
+  let safeCells = 0;
+  for (let i = 0; i < rows; i++)
+    for (let j = 0; j < cols; j++)
+      if (grid[i][j] !== -1 && revealed[i][j]) safeCells++;
+
+  if (safeCells === rows * cols - totalWolves) {
+    gameState = 'won';
+    if (timer) clearInterval(timer);
+    showVictory();
+  }
+}
+
+function gameLose(ti, tj) {
+  gameState = 'lost';
+  if (timer) clearInterval(timer);
+
+  getCell(ti, tj).className = 'cell wolf-revealed';
+  getCell(ti, tj).textContent = '🐺';
+
+  for (let i = 0; i < rows; i++)
+    for (let j = 0; j < cols; j++)
+      if (grid[i][j] === -1 && !(i===ti && j===tj)) {
+        const c = getCell(i, j);
+        if (knives[i][j]) continue;
+        c.className = 'cell revealed' + ((i+j)%2 ? ' alt' : '');
+        c.style.background = 'var(--danger-dark)';
+        c.textContent = '🐺';
+      }
+
+  if (navigator.vibrate) navigator.vibrate(300);
+
+  setTimeout(() => showDefeat(), 600);
+}
+
+const WOLF_SVG = `<svg id="defeat-wolf" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="180" height="180">
+  <defs>
+    <radialGradient id="fg" cx="50%" cy="50%"><stop offset="0%" stop-color="#3a3a3a"/><stop offset="100%" stop-color="#111"/></radialGradient>
+  </defs>
+  <ellipse cx="100" cy="110" rx="80" ry="60" fill="url(#fg)"/>
+  <polygon points="30,65 55,15 80,65" fill="#222"/>
+  <polygon points="120,65 145,15 170,65" fill="#222"/>
+  <polygon points="42,60 55,25 68,60" fill="#3a3a3a"/>
+  <polygon points="132,60 145,25 158,60" fill="#3a3a3a"/>
+  <ellipse cx="65" cy="90" rx="14" ry="12" fill="#ffe066">
+    <animate attributeName="ry" values="12;8;12" dur="0.6s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="135" cy="90" rx="14" ry="12" fill="#ffe066">
+    <animate attributeName="ry" values="12;4;12" dur="0.6s" repeatCount="3" begin="0.3s"/>
+  </ellipse>
+  <ellipse cx="65" cy="90" rx="5" ry="8" fill="#111"/>
+  <ellipse cx="135" cy="90" rx="5" ry="8" fill="#111"/>
+  <ellipse cx="65" cy="88" rx="2" ry="3" fill="#fff" opacity="0.7"/>
+  <ellipse cx="137" cy="88" rx="2" ry="3" fill="#fff" opacity="0.7"/>
+  <path d="M70 50 Q55 70 75 78" fill="#222"/>
+  <path d="M130 50 Q145 70 125 78" fill="#222"/>
+  <path d="M85,120 Q88,105 100,102 Q112,105 115,120 L110,125 Q100,118 90,125 Z" fill="#222"/>
+  <path d="M88,120 Q93,110 100,108 Q107,110 112,120" fill="#e8e8e8"/>
+  <line x1="90" y1="122" x2="98" y2="120" stroke="#e8e8e8" stroke-width="2"/>
+  <line x1="110" y1="122" x2="102" y2="120" stroke="#e8e8e8" stroke-width="2"/>
+  <path d="M88,123 L84,128 L92,126 Z" fill="#fff"/>
+  <path d="M100,122 L100,132" stroke="#fff" stroke-width="1.5"/>
+  <path d="M95,125 L92,112" stroke="#3a3a3a" stroke-width="1"/>
+  <path d="M105,125 L108,112" stroke="#3a3a3a" stroke-width="1"/>
+  <path d="M72,155 Q75,142 85,140 Q95,142 100,155 Q105,142 115,140 Q125,142 128,155" fill="#222"/>
+  <ellipse cx="88" cy="143" rx="4" ry="6" fill="#c0392b"/>
+  <ellipse cx="112" cy="143" rx="4" ry="6" fill="#c0392b"/>
+  <path d="M88,149 L88,145 L92,147 Z" fill="#fff"/>
+  <path d="M112,149 L112,145 L108,147 Z" fill="#fff"/>
+  <path d="M78,42 Q85,25 100,32 Q115,25 122,42" fill="none" stroke="#444" stroke-width="5" stroke-linecap="round"/>
+  <path d="M88,70 Q100,80 112,70" fill="#222" stroke="#222" stroke-width="1"/>
+</svg>`;
+
+function showDefeat() {
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = WOLF_SVG +
+    `<h2 style="color:var(--danger-red);">Oh non !</h2>
+     <p>Le Grand Méchant Loup t'a attrapé !</p>
+     <button class="modal-btn primary" onclick="startGame(rows,cols,totalWolves)">🔁 Rejouer</button>
+     <button class="modal-btn secondary" onclick="goHome()">🏠 Menu</button>`;
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = 'flex';
+  overlay.className = 'show';
+}
+
+function showVictory() {
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `<div class="victory-crown">👑</div>
+    <h2 style="color:var(--gold);">Bravo !</h2>
+    <p>Tu as exploré toute la forêt sans te faire attraper !<br>⏱️ Temps : ${document.getElementById('timer-display').textContent}s</p>
+    <button class="modal-btn primary" onclick="startGame(rows,cols,totalWolves)">🔁 Rejouer</button>
+    <button class="modal-btn secondary" onclick="goHome()">🏠 Menu</button>`;
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = 'flex';
+  overlay.className = 'show';
+}
+
+function goHome() {
+  if (timer) clearInterval(timer);
+  timer = null;
+  gameState = 'idle';
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('menu').style.display = 'flex';
+}
+
+function toggleMode() {
+  currentMode = currentMode === 'discover' ? 'knife' : 'discover';
+  updateModeUI();
+}
+
+function updateModeUI() {
+  const toggle = document.getElementById('mode-toggle');
+  const knob = toggle.querySelector('.toggle-knob');
+  const labelD = document.getElementById('label-discover');
+  const labelK = document.getElementById('label-knife');
+  if (currentMode === 'knife') {
+    toggle.classList.add('knife-mode');
+    knob.textContent = '🔪';
+    labelD.classList.remove('active');
+    labelK.classList.add('active');
+  } else {
+    toggle.classList.remove('knife-mode');
+    knob.textContent = '👣';
+    labelK.classList.remove('active');
+    labelD.classList.add('active');
+  }
+}
+
+document.getElementById('btn-home').addEventListener('click', goHome);
+document.getElementById('btn-fs').addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (gameState === 'playing' || gameState === 'won' || gameState === 'lost') {
+    adjustCellSize();
+  }
+});
+</script>
+</body>
+</html>

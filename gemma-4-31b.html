@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chasseur de Loups</title>
+    <style>
+        :root {
+            --forest-dark: #1a3c34;
+            --forest-mid: #2d5a4c;
+            --forest-light: #8fbc8f;
+            --accent: #e67e22;
+            --text-light: #f0f0f0;
+            --bg-color: #122a23;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        #screen {
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Header */
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: var(--forest-dark);
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .stat { font-size: 1.2rem; font-weight: bold; }
+        .btn-icon {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white;
+            padding: 5px;
+        }
+
+        /* Menu */
+        #menu, #modal {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .menu-card {
+            background: var(--forest-mid);
+            padding: 30px;
+            border-radius: 20px;
+            border: 4px solid var(--forest-light);
+            max-width: 400px;
+        }
+
+        .btn-main {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+        .btn-main:active { transform: scale(0.95); }
+
+        /* Game Grid */
+        #game-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        #grid {
+            display: grid;
+            gap: 4px;
+            background: var(--forest-dark);
+            padding: 4px;
+            border-radius: 8px;
+            user-select: none;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            background: var(--forest-light);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #333;
+            transition: background 0.2s;
+        }
+
+        .cell.revealed { background: #ddd; }
+        .cell.wolf { background: #ff4d4d; }
+        .cell.marked { background: #c0c0c0; }
+
+        /* Controls */
+        #controls {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            background: var(--forest-dark);
+            z-index: 10;
+        }
+
+        .toggle-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            font-size: 1.5rem;
+            border-radius: 30px;
+            border: 3px solid var(--forest-light);
+            cursor: pointer;
+            background: var(--forest-mid);
+            color: white;
+            transition: all 0.3s;
+        }
+        .toggle-btn.active {
+            background: var(--accent);
+            border-color: white;
+        }
+
+        /* Wolf SVG Modal */
+        #wolf-svg {
+            width: 200px;
+            height: 200px;
+            fill: #333;
+            animation: shake 0.5s infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header" class="hidden">
+        <div class="stat">🐺 <span id="wolf-count">0</span></div>
+        <div class="stat">⏱️ <span id="timer">0</span>s</div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-icon" onclick="toggleFullScreen()">⛶</button>
+            <button class="btn-icon" onclick="showMenu()">🏠</button>
+        </div>
+    </div>
+
+    <div id="screen">
+        <!-- Main Menu -->
+        <div id="menu">
+            <div class="menu-card">
+                <h1>🌲 Chasseur de Loups 🌲</h1>
+                <p>Trouve ton chemin dans la forêt sans réveiller les loups !</p>
+                <button class="btn-main" onclick="startGame('apprenti')">Apprenti (6x6, 5🐺)</button>
+                <button class="btn-main" onclick="startGame('explorateur')">Explorateur (8x8, 8🐺)</button>
+                <button class="btn-main" onclick="startGame('chasseur')">Chasseur (9x9, 10🐺)</button>
+                <button class="btn-main" onclick="startGame('grand_chasseur')">Grand Chasseur (12x12, 20🐺)</button>
+            </div>
+        </div>
+
+        <!-- Game Board -->
+        <div id="game-container" class="hidden">
+            <div id="grid"></div>
+        </div>
+
+        <!-- Game Over/Win Modal -->
+        <div id="modal" class="hidden">
+            <div id="modal-content" class="menu-card">
+                <div id="modal-visual"></div>
+                <h2 id="modal-title"></h2>
+                <p id="modal-text"></p>
+                <button class="btn-main" onclick="restartGame()">Rejouer 🔄</button>
+                <button class="btn-main" onclick="showMenu()">Menu 🏠</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="controls" class="hidden">
+        <button id="mode-toggle" class="toggle-btn" onclick="toggleMode()">
+            <span id="mode-icon">👣</span> <span id="mode-text">Découverte</span>
+        </button>
+    </div>
+
+    <script>
+        const CONFIG = {
+            apprenti: { size: 6, wolves: 5 },
+            explorateur: { size: 8, wolves: 8 },
+            chasseur: { size: 9, wolves: 10 },
+            grand_chasseur: { size: 12, wolves: 20 }
+        };
+
+        let currentDiff = 'apprenti';
+        let grid = [];
+        let wolfPositions = new Set();
+        let revealedCells = new Set();
+        let markedCells = new Set();
+        let gameActive = false;
+        let timerInterval;
+        let secondsElapsed = 0;
+        let currentMode = 'discover'; // 'discover' or 'knife'
+
+        const elements = {
+            menu: document.getElementById('menu'),
+            header: document.getElementById('header'),
+            gameContainer: document.getElementById('game-container'),
+            grid: document.getElementById('grid'),
+            controls: document.getElementById('controls'),
+            modal: document.getElementById('modal'),
+            modalVisual: document.getElementById('modal-visual'),
+            modalTitle: document.getElementById('modal-title'),
+            modalText: document.getElementById('modal-text'),
+            wolfCount: document.getElementById('wolf-count'),
+            timer: document.getElementById('timer'),
+            modeToggle: document.getElementById('mode-toggle'),
+            modeIcon: document.getElementById('mode-icon'),
+            modeText: document.getElementById('mode-text')
+        };
+
+        function showMenu() {
+            elements.menu.classList.remove('hidden');
+            elements.header.classList.add('hidden');
+            elements.gameContainer.classList.add('hidden');
+            elements.controls.classList.add('hidden');
+            elements.modal.classList.add('hidden');
+            clearInterval(timerInterval);
+        }
+
+        function startGame(diff) {
+            currentDiff = diff;
+            const { size, wolves } = CONFIG[diff];
+            
+            elements.menu.classList.add('hidden');
+            elements.header.classList.remove('hidden');
+            elements.gameContainer.classList.remove('hidden');
+            elements.controls.classList.remove('hidden');
+            
+            initGame(size, wolves);
+        }
+
+        function initGame(size, wolfCount) {
+            grid = [];
+            wolfPositions.clear();
+            revealedCells.clear();
+            markedCells.clear();
+            gameActive = true;
+            secondsElapsed = 0;
+            
+            // Place wolves
+            while(wolfPositions.size < wolfCount) {
+                const pos = Math.floor(Math.random() * size * size);
+                wolfPositions.add(pos);
+            }
+
+            // Create grid
+            elements.grid.innerHTML = '';
+            elements.grid.style.gridTemplateColumns = `repeat(${size}, 40px)`;
+            
+            for(let i = 0; i < size * size; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.index = i;
+                cell.onclick = () => handleCellClick(i);
+                elements.grid.appendChild(cell);
+            }
+
+            elements.wolfCount.innerText = wolfCount;
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            elements.timer.innerText = '0';
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                elements.timer.innerText = secondsElapsed;
+            }, 1000);
+        }
+
+        function handleCellClick(index) {
+            if(!gameActive) return;
+            
+            const cell = elements.grid.children[index];
+            
+            if(currentMode === 'knife') {
+                if(revealedCells.has(index)) return;
+                
+                if(markedCells.has(index)) {
+                    markedCells.delete(index);
+                    cell.classList.remove('marked');
+                    cell.innerText = '';
+                } else {
+                    markedCells.add(index);
+                    cell.classList.add('marked');
+                    cell.innerText = '🔪';
+                    if(window.navigator.vibrate) window.navigator.vibrate(50);
+                }
+                updateWolfCount();
+                return;
+            }
+
+            if(markedCells.has(index)) return;
+
+            if(wolfPositions.has(index)) {
+                gameOver();
+            } else {
+                revealCell(index);
+                checkWin();
+            }
+        }
+
+        function revealCell(index) {
+            if(revealedCells.has(index)) return;
+            revealedCells.add(index);
+            
+            const size = CONFIG[currentDiff].size;
+            const cell = elements.grid.children[index];
+            cell.classList.add('revealed');
+
+            const neighbors = getNeighbors(index, size);
+            const wolfCount = neighbors.filter(n => wolfPositions.has(n)).length;
+            
+            cell.innerText = wolfCount > 0 ? wolfCount : '';
+            
+            if(wolfCount === 0) {
+                neighbors.forEach(n => revealCell(n));
+            }
+        }
+
+        function getNeighbors(index, size) {
+            const neighbors = [];
+            const r = Math.floor(index / size);
+            const c = index % size;
+
+            for(let dr = -1; dr <= 1; dr++) {
+                for(let dc = -1; dc <= 1; dc++) {
+                    if(dr === 0 && dc === 0) continue;
+                    const nr = r + dr;
+                    const nc = c + dc;
+                    if(nr >= 0 && nr < size && nc >= 0 && nc < size) {
+                        neighbors.push(nr * size + nc);
+                    }
+                }
+            }
+            return neighbors;
+        }
+
+        function updateWolfCount() {
+            const totalWolves = CONFIG[currentDiff].wolves;
+            elements.wolfCount.innerText = totalWolves - markedCells.size;
+        }
+
+        function toggleMode() {
+            currentMode = currentMode === 'discover' ? 'knife' : 'discover';
+            elements.modeIcon.innerText = currentMode === 'discover' ? '👣' : '🔪';
+            elements.modeText.innerText = currentMode === 'discover' ? 'Découverte' : 'Couteau';
+            elements.modeToggle.classList.toggle('active', currentMode === 'knife');
+        }
+
+        function checkWin() {
+            const totalCells = CONFIG[currentDiff].size ** 2;
+            if(revealedCells.size === totalCells - wolfPositions.size) {
+                gameWin();
+            }
+        }
+
+        function gameWin() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            elements.modalVisual.innerHTML = '<div style="font-size: 4rem">👑</div>';
+            elements.modalTitle.innerText = 'Victoire !';
+            elements.modalText.innerText = `Félicitations, jeune chasseur ! Tu as exploré la forêt en ${secondsElapsed} secondes.`;
+            elements.modal.classList.remove('hidden');
+        }
+
+        function gameOver() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            if(window.navigator.vibrate) window.navigator.vibrate(300);
+
+            elements.modalVisual.innerHTML = `
+                <svg id="wolf-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" fill="#4a4a4a"/>
+                    <circle cx="35" cy="40" r="8" fill="yellow"/>
+                    <circle cx="65" cy="40" r="8" fill="yellow"/>
+                    <path d="M 40 60 Q 50 80 60 60" stroke="white" stroke-width="3" fill="none"/>
+                    <path d="M 45 65 L 45 75 M 55 65 L 55 75" stroke="white" stroke-width="2"/>
+                </svg>
+            `;
+            elements.modalTitle.innerText = 'GAME OVER';
+            elements.modalText.innerText = 'Le Grand Méchant Loup t\'a attrapé !';
+            elements.modal.classList.remove('hidden');
+
+            // Reveal all wolves
+            wolfPositions.forEach(pos => {
+                const cell = elements.grid.children[pos];
+                cell.classList.add('wolf');
+                cell.innerText = '🐺';
+            });
+        }
+
+        function restartGame() {
+            elements.modal.classList.add('hidden');
+            startGame(currentDiff);
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
