@@ -7,7 +7,7 @@
 - **Format** : Application web dans un **fichier HTML unique** (`index.html`).
 - **Langages** : HTML5, CSS3 (Vanilla) et JavaScript (Vanilla).
 - **Rendu** : Entièrement "responsive", optimisé pour les écrans de téléphones portables.
-- **Assets** : Les icônes et illustrations (loups, drapeaux, etc.) doivent être intégrées via SVG ou CSS pour conserver le format fichier unique.
+- **Assets** : Les icônes et illustrations principales (loup terrifiant en modale défaite) sont intégrées via SVG. Les autres icônes (loups sur la grille, traces de pas, couteau, couronne, maison) utilisent des emojis Unicode pour conserver le format fichier unique.
 
 ## 3. Mécaniques de Jeu
 - **La Grille** : Un champ de cases carrées. Certaines cachent des loups.
@@ -18,26 +18,31 @@
     - **Chasseur** : 9x9 cases, 10 loups (Standard Débutant).
     - **Grand Chasseur** : 12x12 cases, 20 loups.
 - **Modes d'action** : Un bouton sélecteur en bas de l'écran permet de basculer entre :
-    - **Mode Découverte** (Icône Traces de pas) : Suit la piste de l'enfant qui marche et révèle le contenu de la case.
-    - **Mode Couteau** (Icône Couteau) : Plante un couteau pour marquer l'emplacement supposé d'un loup.
+    - **Mode Découverte** (Icône 👣 Traces de pas) : Suit la piste de l'enfant qui marche et révèle le contenu de la case.
+    - **Mode Couteau** (Icône 🔪 Couteau) : Plante un couteau pour marquer l'emplacement supposé d'un loup.
 
 ## 4. Interface Utilisateur (UI)
 - **Thème Visuel** : Forêt mystérieuse mais colorée, adaptée aux enfants.
 - **Grille de jeu** : Centrée, avec des cases assez grandes pour être cliquées facilement au doigt.
-- **Barre d'outils (Bas)** :
-    - Un interrupteur visuel clair (Toggle) pour changer de mode.
-    - Compteur de loups restants (drapeaux posés).
+- **Barre d'en-tête (Haut)** :
+    - Compteur de loups restants (couteaux posés).
     - Chronomètre simple.
+    - Bouton plein écran.
+    - Bouton retour à l'accueil (🏠).
+- **Barre de contrôles (Bas)** :
+    - Un interrupteur visuel clair (Toggle) pour changer de mode (Découverte / Couteau).
 - **Menu de démarrage** : Choix de la difficulté.
 
 ## 5. États du Jeu
-- **Victoire** : Écran joyeux avec un message de félicitations et un bouton pour rejouer.
+- **Victoire** : Écran joyeux (👑) avec un message de félicitations et des boutons pour rejouer ou retourner au menu.
 - **Défaite (Game Over)** :
-    - Affichage d'une illustration **un peu terrifiante** du "Grand Méchant Loup" (style conte de fées, yeux jaunes, grandes dents).
-    - Vibrations légères (si supporté par le navigateur) pour l'effet de surprise.
+    - Affichage d'une illustration SVG **un peu terrifiante** du "Grand Méchant Loup" (yeux jaunes, grandes dents) avec animation de tremblement.
+    - Vibrations (300ms si supporté par le navigateur) pour l'effet de surprise (50ms lors du posage d'un couteau).
     - Révélation de tous les loups restants sur la grille.
+    - Boutons pour rejouer ou retourner au menu.
 
 ## 6. Accessibilité & Ergonomie
 - Pas de clic droit nécessaire (le mode drapeau gère cela via le sélecteur).
 - Couleurs contrastées.
 - Feedback visuel immédiat lors d'un clic sur une case.
+- Mode plein écran disponible via un bouton dédié.
